@@ -1,0 +1,62 @@
+# Loading required R package for fitting a mixed linear model:
+library(nlme)
+
+# Importing data from the .csv file:
+data = read.csv(file="C:\\Users\\Coolcashew\\Desktop\\analyst-data.csv")
+
+# Question 2: Renaming variables:
+names(data)[c(4,5,6)] = c("normal","poisson","gauss") 
+
+# Question 3: Calculating summary statitsics for each of the three normal distribuitons: 
+## Extract data for the three different normal distributions based on variable "time": 
+normal1 = data[which(data$time==1),4] 
+normal2 = data[which(data$time==2),4]
+normal3 = data[which(data$time==3),4]
+
+## Calculating summary statistics and standard deviations
+summary(normal1)
+summary(normal2)
+summary(normal3)
+sd(normal1)
+sd(normal2)
+sd(normal3)
+
+# Question 4: Producing a histogram and save it as a .pdf file. (The file will be saved under your current working directory)
+
+## Initiating a .pdf file
+pdf(file="histogram.pdf")
+
+## Making histogram 
+hist(data$poisson) 
+## Adding lines indicating mean (in red) and median (in blue) in the histogram
+abline(v=mean(data$poisson),col="red")
+
+abline(v=median(data$poisson),col="blue")
+
+## Closing the .pdf file
+dev.off()
+
+# Question 5: Fitting a mixed linear model and obtaining model summary
+model1 = lme(gauss~cats, data=data, random=~1|id)
+
+summary(model1)
+
+# Question 6: Generating new data and fitting a linear model
+
+## Setting seed for the random number generator so the results are reproducible:
+set.seed(123)
+
+## Generating random numbers from a normal distribution 
+cru3=rnorm(length(normal3),10,10)   
+cru2=rnorm(length(normal2),31,10)   
+cru1=rnorm(length(normal1),31,10)   
+cru=matrix(c(cru1,cru2,cru3),ncol=1)
+
+## Adding the newly generated data into the original dataset as a new column 
+data = cbind(data,cru)
+
+## Fitting linear model
+model2 = lme(cru~factor(time), data=data, random=~1|id)
+
+## Model summary
+summary(model2)
